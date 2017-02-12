@@ -1,6 +1,7 @@
 function [TrainingTime, TestingTime, TrainingAccuracy, TestingAccuracy,output_training,output_testing] = ELM_sparse_Input_Weight(train_data, test_data, No_of_Output, NumberofHiddenNeurons, ActivationFunction)
 % [TrainingTime_ELM_proximal, TestingTime_ELM_proximal, TrainingAccuracy_ELM_proximal, TestingAccuracy_ELM_proximal,train_output_ELM_proximal,test_output_ELM_proximal]
-iteration_times=10;
+iteration_times=6;
+lambda=0.75;
 %This program is used to update the dictionary set and sparse
 %representation through Proximal gradient descent method.
 %The parameters we use are listed as follows:
@@ -62,7 +63,7 @@ H=H';
 T=T';
 L=size(H,2);%The number of Hidden Neurons
 M=size(T,2);%The dimension of beta1...betaL
-beta=zeros(L,M);%Defination of beta
+beta=rand(L,M);%Defination of beta
 % X=P;
 %==========================================================================
 %Update the Input weights and output weight.
@@ -74,6 +75,8 @@ temp_matrix=temp_c*temp_b*abs(transpose(beta))+abs(X)*abs(T)*abs(transpose(beta)
 stepsize_w=sqrt(3)/18*norm(temp_matrix,'fro');
 S=(beta*transpose(H*beta-T)).*transpose(H).*(1-transpose(H));
 InputWeight=InputWeight-1/stepsize_w*S*P';
+% InputWeight=(InputWeight-lambda/stepsize_w-1/stepsize_w*S*P').*(InputWeight-lambda/stepsize_w-1/stepsize_w*S*P'>0)...
+%     +(InputWeight+lambda/stepsize_w-1/stepsize_w*S*P').*(InputWeight+lambda/stepsize_w-1/stepsize_w*S*P'<0);
 tempH=InputWeight*P;
 switch lower(ActivationFunction)
     case {'sig','sigmoid'}
@@ -145,4 +148,4 @@ TestingTime=toc;
 TestingAccuracy=sqrt(mse(TV.T - TY));            %   Calculate testing accuracy (RMSE) for regression case
 output_testing=TY;
 sparsity=sum(sum((InputWeight==0)));
-disp(['The sparsity of input weight of Sparse input ELM is ',num2str(sparsity/numel(beta))]);
+disp(['The sparsity of input weight of Sparse input ELM is ',num2str(sparsity/numel(InputWeight))]);
